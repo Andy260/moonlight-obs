@@ -33,13 +33,13 @@
     },
     "platformConfig": {
         "macos": {
-            "bundleId": "com.example.plugintemplate-for-obs"
+            "bundleId": "com.andrewbarbour.moonlightobs"
         }
     },
-    "name": "plugintemplate-for-obs",
-    "displayName": "Plugin Template for OBS",
-    "version": "1.0.0",
-    "author": "Your Name Here",
-    "website": "https://example.com",
-    "email": "me@example.com"
+    "name": "moonlight-obs",
+    "displayName": "Moonlight OBS Studio implementation",
+    "version": "0.0.0",
+    "author": "Andrew Barbour",
+    "website": "https://github.com/Andy260/moonlight-obs",
+    "email": "andrew.barbour1@gmail.com"
 }

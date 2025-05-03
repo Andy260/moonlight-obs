@@ -1,6 +1,6 @@
 /*
-Plugin Name
-Copyright (C) <Year> <Developer> <Email Address>
+Moonlight OBS
+Copyright (C) 2025 Andrew Barbour andrew.barbour1@gmail.com
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,7 +16,10 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
+// OBS Studio headers
 #include <obs-module.h>
+
+// Plugin headers
 #include <plugin-support.h>
 
 OBS_DECLARE_MODULE()
@@ -31,4 +34,14 @@ bool obs_module_load(void)
 void obs_module_unload(void)
 {
 	obs_log(LOG_INFO, "plugin unloaded");
+}
+
+const char* obs_module_name(void)
+{
+	return PLUGIN_NAME;
+}
+
+const char* obs_module_description(void)
+{
+	return "OBS Studio implementation of Moonlight";
 }
