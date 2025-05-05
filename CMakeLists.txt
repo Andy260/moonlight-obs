@@ -13,6 +13,13 @@ include(helpers)
 
 add_library(${CMAKE_PROJECT_NAME} MODULE)
 
+# Add Moonlight Common C dependency
+# and link as a static library
+set(BUILD_SHARED_LIBS OFF)
+add_subdirectory(deps/moonlight-common-c)
+include_directories(deps/moonlight-common-c/src) 
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE moonlight-common-c)
+
 find_package(libobs REQUIRED)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OBS::libobs)
 
@@ -34,6 +41,9 @@ if(ENABLE_QT)
   )
 endif()
 
-target_sources(${CMAKE_PROJECT_NAME} PRIVATE src/plugin-main.cpp)
+target_sources(${CMAKE_PROJECT_NAME} 
+  PRIVATE src/plugin-main.cpp 
+          src/moonlight-source.cpp
+)
 
 set_target_properties_plugin(${CMAKE_PROJECT_NAME} PROPERTIES OUTPUT_NAME ${_name})

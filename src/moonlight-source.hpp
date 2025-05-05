@@ -16,35 +16,21 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-// OBS Studio headers
+#pragma once
+
+// OBS Studio includes
 #include <obs-module.h>
 
-// Plugin headers
-#include <plugin-support.h>
-#include "moonlight-source.hpp"
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-OBS_DECLARE_MODULE()
-OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
+/**
+ * @brief Source information for the Moonlight source.
+ * 
+ */
+extern struct obs_source_info moonlight_source_info;
 
-bool obs_module_load(void)
-{
-	obs_register_source(&moonlight_source_info);
-
-	obs_log(LOG_INFO, "plugin loaded successfully (version %s)", PLUGIN_VERSION);
-	return true;
+#ifdef __cplusplus
 }
-
-void obs_module_unload(void)
-{
-	obs_log(LOG_INFO, "plugin unloaded");
-}
-
-const char* obs_module_name(void)
-{
-	return PLUGIN_NAME;
-}
-
-const char* obs_module_description(void)
-{
-	return "OBS Studio implementation of Moonlight";
-}
+#endif

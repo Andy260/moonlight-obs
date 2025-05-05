@@ -1,0 +1,3 @@
+[submodule "deps/moonlight-common-c"]
+	path = deps/moonlight-common-c
+	url = https://github.com/moonlight-stream/moonlight-common-c.git
