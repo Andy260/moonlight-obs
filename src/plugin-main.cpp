@@ -21,13 +21,25 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 
 // Plugin headers
 #include <plugin-support.h>
-#include "moonlight-source.hpp"
+//#include "moonlight-source.hpp"
+#include "OBSSource.hpp"
+
+using namespace MoonlightOBS;
 
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE(PLUGIN_NAME, "en-US")
 
+// Since OBS Studio is C-based and requires a pointer to the source information object
+// we'll have to declare it within the extern "C" block outside of the class
+extern "C"
+{
+    // Source information for the Moonlight source.
+    extern struct obs_source_info moonlight_source_info = OBSSource::CreateSourceInfo();
+}
+
 bool obs_module_load(void)
 {
+	// Register the source
 	obs_register_source(&moonlight_source_info);
 
 	obs_log(LOG_INFO, "plugin loaded successfully (version %s)", PLUGIN_VERSION);
