@@ -36,6 +36,7 @@ bool obs_module_load(void)
 
 void obs_module_unload(void)
 {
+	// TODO: Disconnect from any connected paired devices
 	obs_log(LOG_INFO, "plugin unloaded");
 }
 
@@ -46,5 +47,5 @@ const char* obs_module_name(void)
 
 const char* obs_module_description(void)
 {
-	return "OBS Studio implementation of Moonlight";
+	return "Unofficial OBS Studio implementation of Moonlight";
 }

@@ -31,6 +31,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 
 // Project includes
 #include "plugin-support.h"
+#include "Properties.hpp"
 
 struct MoonlightSource
 {
@@ -53,29 +54,11 @@ static void* MoonlightCreateSource(obs_data_t* settings, obs_source_t* source)
 
 static obs_properties_t* MoonlightGetProperties(void* data)
 {
-    obs_properties_t* props = obs_properties_create();
-
-    // Add a combo box (drop-down list) for selecting the host
-    obs_property_t* connectionCombo = obs_properties_add_list(
-        props,
-        "host",                 // Internal name of the property
-        "Paired Device",        // Label displayed in the UI
-        OBS_COMBO_TYPE_LIST,    // Combo box type
-        OBS_COMBO_FORMAT_STRING // Format as strings
-    );
-    // Add options to the connection combo box
-    // TODO: Retrieve the list of paired devices and add them to the combo box
-
-    // Add a button to connect to the selected host
-    obs_properties_add_button(
-        props,          
-        "connect_button",   // Internal name of the button
-        "Connect",          // Label displayed on the button
-        nullptr             // Callback function for button click
-    );
+    // Create the source properties
+    MoonlightOBS::Properties properties;
 
     UNUSED_PARAMETER(data);
-    return props;
+    return properties.GetHandle();
 }
 
 static bool MoonlightAudioRender(void* data, uint64_t* ts_out, 
@@ -88,7 +71,12 @@ static bool MoonlightAudioRender(void* data, uint64_t* ts_out,
 
 static void MoonlightDestroySource(void* data)
 {
-    
+    struct MoonlightSource* context = static_cast<MoonlightSource*>(data);
+    if (context != nullptr) 
+    {
+        // Clean up the source data
+        bfree(context);
+    }
 }
 
 static obs_source_info CreateSourceInfo()
