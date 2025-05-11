@@ -1,5 +1,8 @@
 #pragma once
 
+// STL includes
+#include <string>
+
 // OBS Studio includes
 // (forward declarations can't be used since OBS Studio's type are typedefs)
 #include <obs-properties.h>
@@ -7,6 +10,9 @@
 
 namespace MoonlightOBS
 {
+    // Forward declarations
+    class OBSSource;
+
     /**
      * @brief Handles the properties of the moonlight source.
      * 
@@ -50,17 +56,17 @@ namespace MoonlightOBS
         // "Connect" button
         obs_property_t* m_connectButton;
         static obs_property_t* CreateConnectButton(obs_properties_t* props);
-        static bool OnConnectButtonPressed(obs_properties_t* props, obs_property_t* property, void* data);
+        static bool OnConnectButtonPressed(obs_properties_t* props, obs_property_t* property, OBSSource* source);
 
         // "Pair New Device" button
         obs_property_t* m_pairButton;
         static obs_property_t* CreatePairButton(obs_properties_t* props);
-        static bool OnPairButtonPressed(obs_properties_t* props, obs_property_t* property, void* data);
+        static bool OnPairButtonPressed(obs_properties_t* props, obs_property_t* property, OBSSource* source);
 
         // "Unpair Device" button
         obs_property_t* m_removeButton;
         static obs_property_t* CreateRemoveButton(obs_properties_t* props);
-        static bool OnRemoveButtonPressed(obs_properties_t* props, obs_property_t* property, void* data);
+        static bool OnRemoveButtonPressed(obs_properties_t* props, obs_property_t* property, OBSSource* source);
 
         // "Automatically reconnect" checkbox
         obs_property_t* m_reconnectCheckbox;
@@ -90,5 +96,8 @@ namespace MoonlightOBS
         // "Audio Output Mode" combo box
         obs_property_t* m_audioModeList;
         static obs_property_t* CreateAudioModeList(obs_properties_t* props);
+
+        // Displays a message box with the given title and message
+        static void DisplayMessageBox(std::string title, std::string message);
     };
 } // namespace MoonlightOBS

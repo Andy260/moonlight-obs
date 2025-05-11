@@ -14,6 +14,7 @@
 
 // Project includes
 #include "Forms/PairDialog.hpp"
+#include "OBSSource.hpp"
 
 using namespace MoonlightOBS;
 
@@ -92,15 +93,40 @@ obs_property_t* Properties::CreateConnectButton(obs_properties_t* props)
         props,                              // Internal name of the property
         "connect_device",                   // Label displayed in the UI
         obs_module_text("Device.Connect"),  // Label displayed in the UI
-        OnConnectButtonPressed              // Callback function for button click
+        [](obs_properties_t* props, obs_property_t* property, void* data) -> bool
+        {
+            return Properties::OnConnectButtonPressed(props, property, static_cast<OBSSource*>(data));
+        } // Callback function for button click
     );
 
     return button;
 }
 
-bool Properties::OnConnectButtonPressed(obs_properties_t* props, obs_property_t* property, void* data)
+bool Properties::OnConnectButtonPressed(obs_properties_t* props, obs_property_t* property, OBSSource* source)
 {
+    // Get the current settings of the source instance
+    obs_data_t* settings = obs_source_get_settings(source->GetSource());
+
+    // Get the currently selected value from the "host" list property
+    std::string selectedHost(obs_data_get_string(settings, "host"));
+
+    if (!selectedHost.empty())
+    {
+        // TODO: Implement the connection logic using the selected host
+    }
+    else
+    {
+        // No host selected, show an error message
+        DisplayMessageBox("Error", obs_module_text("Device.NoDevice"));
+    }
+
     // TODO: Implement the "Connect" button
+
+    UNUSED_PARAMETER(props);
+    UNUSED_PARAMETER(property);
+    UNUSED_PARAMETER(source);
+    
+    // Don't repaint the UI
     return false;
 }
 
@@ -114,13 +140,16 @@ obs_property_t* Properties::CreatePairButton(obs_properties_t* props)
         props,          
         "add_device",                       // Internal name of the button
         obs_module_text("Device.Pair"),  // Label displayed on the button
-        OnPairButtonPressed                 // Callback function for button click
+        [](obs_properties_t* props, obs_property_t* property, void* data) -> bool
+        {
+            return Properties::OnPairButtonPressed(props, property, static_cast<OBSSource*>(data));
+        } // Callback function for button click
     );
 
     return button;
 }
 
-bool Properties::OnPairButtonPressed(obs_properties_t* props, obs_property_t* property, void* data)
+bool Properties::OnPairButtonPressed(obs_properties_t* props, obs_property_t* property, OBSSource* source)
 {
     // Display the Pairing dialog
     QWidget* mainWindow = static_cast<QWidget*>(obs_frontend_get_main_window());
@@ -136,9 +165,10 @@ bool Properties::OnPairButtonPressed(obs_properties_t* props, obs_property_t* pr
 
     UNUSED_PARAMETER(props);
     UNUSED_PARAMETER(property);
-    UNUSED_PARAMETER(data);
-    // Indicate that the callback was handled successfully
-    return true;
+    UNUSED_PARAMETER(source);
+
+    // Don't repaint the UI
+    return false;
 }
 
 obs_property_t* Properties::CreateRemoveButton(obs_properties_t* props)
@@ -151,15 +181,37 @@ obs_property_t* Properties::CreateRemoveButton(obs_properties_t* props)
         props,          
         "remove_device",                    // Internal name of the button
         obs_module_text("Device.Unpair"),   // Label displayed on the button
-        OnRemoveButtonPressed               // Callback function for button click
+        [](obs_properties_t* props, obs_property_t* property, void* data) -> bool
+        {
+            return Properties::OnRemoveButtonPressed(props, property, static_cast<OBSSource*>(data));
+        } // Callback function for button click
     );
 
     return button;
 }
 
-bool Properties::OnRemoveButtonPressed(obs_properties_t* props, obs_property_t* property, void* data)
+bool Properties::OnRemoveButtonPressed(obs_properties_t* props, obs_property_t* property, OBSSource* source)
 {
-    // TODO: Implement the "Unpair Device" button
+    // Get the current settings of the source instance
+    obs_data_t* settings = obs_source_get_settings(source->GetSource());
+
+    // Get the currently selected value from the "host" list property
+    std::string selectedHost(obs_data_get_string(settings, "host"));
+
+    if (!selectedHost.empty())
+    {
+        // TODO: Implement the unpairing logic
+    }
+    else
+    {
+        // No host selected, show an error message
+        DisplayMessageBox("Error", obs_module_text("Device.NoDevice"));
+    }
+
+    UNUSED_PARAMETER(props);
+    UNUSED_PARAMETER(property);
+
+    // Don't repaint the UI
     return false;
 }
 
@@ -233,7 +285,9 @@ bool Properties::OnDisplayTypeChanged(obs_properties_t *props, obs_property_t* p
     obs_property_set_enabled(resolution, enable);
     obs_property_set_enabled(fps, enable);
 
-    // Return true to indicate a repaint is required
+    UNUSED_PARAMETER(property);
+
+    // Repaint the UI
     return true;
 }
 
@@ -321,4 +375,23 @@ obs_property_t* Properties::CreateAudioModeList(obs_properties_t* props)
     obs_property_list_add_string(audioMode, obs_module_text("AudioOutputMode.WaveOut"), "waveout");
 
     return audioMode;
+}
+
+void Properties::DisplayMessageBox(std::string title, std::string message)
+{
+    // Ensure arguments are valid
+    if (title.empty() || message.empty())
+    {
+        throw std::invalid_argument("Title and message cannot be empty");
+    }
+
+    // Get the main window of the OBS Studio application
+    QWidget* mainWindow = static_cast<QWidget*>(obs_frontend_get_main_window());
+    
+    // Display the message box
+    QMessageBox::warning(mainWindow, 
+        QString::fromStdString(title), 
+        QString::fromStdString(message), 
+        QMessageBox::Ok
+    );
 }
