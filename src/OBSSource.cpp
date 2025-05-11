@@ -28,6 +28,7 @@ obs_source_info OBSSource::CreateSourceInfo()
     source_info.create          = OnOBSSourceCreate;
     source_info.destroy         = OnOBSSourceDestroy;
     source_info.get_properties  = OnOBSGetProperties;
+    source_info.get_defaults    = OnOBSGetDefaults;
     source_info.audio_render    = OnOBSAudioRender;
 
     return source_info;
@@ -96,8 +97,6 @@ obs_properties_t* OBSSource::OnOBSGetProperties(void* data)
     // Create the source properties
     Properties properties;
 
-    // TODO: Set up the properties here
-
     UNUSED_PARAMETER(data);
     return properties.GetHandle();
 }
@@ -116,4 +115,22 @@ bool OBSSource::OnOBSAudioRender(void* data, uint64_t* ts_out,
     UNUSED_PARAMETER(channels);
     UNUSED_PARAMETER(sample_rate);
     return true; // Return true to indicate successful audio rendering
+}
+
+void OBSSource::OnOBSGetDefaults(obs_data_t* settings)
+{
+    // Set Automatically Reconnect to the default value
+    obs_data_set_default_bool(settings, "reconnect", true);
+    // Set bitrate to the default value
+    obs_data_set_default_double(settings, "bitrate", 20.0);
+    // Set the display type to the default value
+    obs_data_set_default_string(settings, "display_type", "default");
+    // Set the resolution to the default value
+    obs_data_set_default_string(settings, "resolution", "");
+    // Set the FPS to the default value (Match Output FPS)
+    obs_data_set_default_double(settings, "fps", 0.0);
+    // Set the hardware decoding to the default value
+    obs_data_set_default_bool(settings, "hardware_decoding", true);
+    // Set the Audio Output Mode to the default value (Capture audio only)
+    obs_data_set_default_string(settings, "audio_mode", "AudioOutputMode.Capture");
 }

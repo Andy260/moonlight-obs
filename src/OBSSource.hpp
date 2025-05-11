@@ -19,6 +19,16 @@ namespace MoonlightOBS
          */
         static obs_source_info CreateSourceInfo();
 
+        /**
+         * @brief Get the OBS Source object.
+         * 
+         * @return obs_source_t* Returns the OBS source object.
+         */
+        inline obs_source_t* GetSource() const
+        {
+            return m_source;
+        }
+
     private:
         /**
          * @brief Construct a new OBSSource object
@@ -47,5 +57,7 @@ namespace MoonlightOBS
         static bool OnOBSAudioRender(void* data, uint64_t* ts_out, 
             struct obs_source_audio_mix* audio_output, 
             uint32_t mixers, size_t channels, size_t sample_rate);
+        // obs_source_info.get_defaults callback
+        static void OnOBSGetDefaults(obs_data_t* settings);
     };
 }
