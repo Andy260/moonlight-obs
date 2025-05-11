@@ -5,8 +5,15 @@
 #include <string>
 
 // OBS Studio includes
+#include <obs-frontend-api.h>
 #include <obs-module.h>
 #include <obs-properties.h>
+
+// Qt includes
+#include <QtWidgets>
+
+// Project includes
+#include "Forms/PairDialog.hpp"
 
 using namespace MoonlightOBS;
 
@@ -91,7 +98,7 @@ obs_property_t* Properties::CreateConnectButton(obs_properties_t* props)
     return button;
 }
 
-bool Properties::OnConnectButtonPressed(obs_properties_t *props, obs_property_t *property, void *data)
+bool Properties::OnConnectButtonPressed(obs_properties_t* props, obs_property_t* property, void* data)
 {
     // TODO: Implement the "Connect" button
     return false;
@@ -113,10 +120,25 @@ obs_property_t* Properties::CreatePairButton(obs_properties_t* props)
     return button;
 }
 
-bool Properties::OnPairButtonPressed(obs_properties_t *props, obs_property_t *property, void *data)
+bool Properties::OnPairButtonPressed(obs_properties_t* props, obs_property_t* property, void* data)
 {
-    // TODO: Implement the "Pair New Device" button
-    return false;
+    // Display the Pairing dialog
+    QWidget* mainWindow = static_cast<QWidget*>(obs_frontend_get_main_window());
+    PairDialog dialog(mainWindow);
+
+    if (dialog.exec() == QDialog::Accepted) 
+    {
+        // Get the address entered in the dialog
+        QString address = dialog.GetAddress();
+        
+        // TODO: Implement the pairing logic using the address
+    }
+
+    UNUSED_PARAMETER(props);
+    UNUSED_PARAMETER(property);
+    UNUSED_PARAMETER(data);
+    // Indicate that the callback was handled successfully
+    return true;
 }
 
 obs_property_t* Properties::CreateRemoveButton(obs_properties_t* props)
@@ -128,14 +150,14 @@ obs_property_t* Properties::CreateRemoveButton(obs_properties_t* props)
     obs_property_t* button = obs_properties_add_button(
         props,          
         "remove_device",                    // Internal name of the button
-        obs_module_text("Device.Unpair"),    // Label displayed on the button
-        OnPairButtonPressed                 // Callback function for button click
+        obs_module_text("Device.Unpair"),   // Label displayed on the button
+        OnRemoveButtonPressed               // Callback function for button click
     );
 
     return button;
 }
 
-bool Properties::OnRemoveButtonPressed(obs_properties_t *props, obs_property_t *property, void *data)
+bool Properties::OnRemoveButtonPressed(obs_properties_t* props, obs_property_t* property, void* data)
 {
     // TODO: Implement the "Unpair Device" button
     return false;

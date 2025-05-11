@@ -50,17 +50,17 @@ namespace MoonlightOBS
         // "Connect" button
         obs_property_t* m_connectButton;
         static obs_property_t* CreateConnectButton(obs_properties_t* props);
-        static bool OnConnectButtonPressed(obs_properties_t *props, obs_property_t *property, void *data);
+        static bool OnConnectButtonPressed(obs_properties_t* props, obs_property_t* property, void* data);
 
         // "Pair New Device" button
         obs_property_t* m_pairButton;
         static obs_property_t* CreatePairButton(obs_properties_t* props);
-        static bool OnPairButtonPressed(obs_properties_t *props, obs_property_t *property, void *data);
+        static bool OnPairButtonPressed(obs_properties_t* props, obs_property_t* property, void* data);
 
         // "Unpair Device" button
         obs_property_t* m_removeButton;
         static obs_property_t* CreateRemoveButton(obs_properties_t* props);
-        static bool OnRemoveButtonPressed(obs_properties_t *props, obs_property_t *property, void *data);
+        static bool OnRemoveButtonPressed(obs_properties_t* props, obs_property_t* property, void* data);
 
         // "Automatically reconnect" checkbox
         obs_property_t* m_reconnectCheckbox;

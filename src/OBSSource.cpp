@@ -94,7 +94,7 @@ void OBSSource::OnOBSSourceDestroy(void* data)
 obs_properties_t* OBSSource::OnOBSGetProperties(void* data)
 {
     // Create the source properties
-    MoonlightOBS::Properties properties;
+    Properties properties;
 
     // TODO: Set up the properties here
 

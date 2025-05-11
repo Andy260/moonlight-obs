@@ -42,7 +42,8 @@ if(ENABLE_QT)
 endif()
 
 target_sources(${CMAKE_PROJECT_NAME} 
-  PRIVATE src/plugin-main.cpp
+  PRIVATE src/Forms/PairDialog.cpp
+          src/plugin-main.cpp
           src/Properties.cpp
           src/OBSSource.cpp
 )
