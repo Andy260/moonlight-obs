@@ -12,17 +12,18 @@ namespace MoonlightOBS
     /**
      * @brief Dialog for pairing with a device.
      */
-    class PairDialog : public QDialog
+    class ManualPairingDialog : public QDialog
     {
         Q_OBJECT
 
     public:
         /**
-         * @brief Construct a new Pair Dialog object
+         * @brief Construct the FindHostsDialog dialog for pairing with a 
+         *        GameStream host manually specified by the user.
          * 
          * @param parent The parent widget for this dialog.    
          */
-        explicit PairDialog(QWidget* parent = nullptr);
+        explicit ManualPairingDialog(QWidget* parent = nullptr);
 
         /**
          * @brief Get the entered address from the dialog.

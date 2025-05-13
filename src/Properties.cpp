@@ -13,7 +13,7 @@
 #include <QtWidgets>
 
 // Project includes
-#include "Forms/PairDialog.hpp"
+#include "Forms/FindHostsDialog.hpp"
 #include "OBSSource.hpp"
 
 using namespace MoonlightOBS;
@@ -153,14 +153,10 @@ bool Properties::OnPairButtonPressed(obs_properties_t* props, obs_property_t* pr
 {
     // Display the Pairing dialog
     QWidget* mainWindow = static_cast<QWidget*>(obs_frontend_get_main_window());
-    PairDialog dialog(mainWindow);
-
-    if (dialog.exec() == QDialog::Accepted) 
+    FindHostsDialog dialog(mainWindow);
+    if (dialog.exec() == QDialog::Accepted)
     {
-        // Get the address entered in the dialog
-        QString address = dialog.GetAddress();
-        
-        // TODO: Implement the pairing logic using the address
+        // TODO: Implement the pairing logic using the selected host
     }
 
     UNUSED_PARAMETER(props);

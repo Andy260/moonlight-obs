@@ -1,4 +1,4 @@
-#include "PairDialog.hpp"
+#include "ManualPairingDialog.hpp"
 
 // OBS Studio includes
 #include <obs-module.h>
@@ -12,19 +12,19 @@
 
 using namespace MoonlightOBS;
 
-PairDialog::PairDialog(QWidget* parent) 
+ManualPairingDialog::ManualPairingDialog(QWidget* parent) 
     : QDialog(parent)
 {
     // Set the dialog title
-    setWindowTitle(obs_module_text("PairingDialog.Title"));
+    setWindowTitle(obs_module_text("ManualPairingDialog.Title"));
 
     // Address Label and Text Box
-    QLabel *addressLabel = new QLabel(obs_module_text("PairingDialog.Address"), this);
+    QLabel *addressLabel = new QLabel(obs_module_text("ManualPairingDialog.Address"), this);
     m_addressLineEdit = new QLineEdit(this);
 
     // Buttons
-    QPushButton* connectButton  = new QPushButton(obs_module_text("PairingDialog.Connect"), this);
-    QPushButton* cancelButton   = new QPushButton(obs_module_text("PairingDialog.Cancel"), this);
+    QPushButton* connectButton  = new QPushButton(obs_module_text("ManualPairingDialog.Connect"), this);
+    QPushButton* cancelButton   = new QPushButton(obs_module_text("ManualPairingDialog.Cancel"), this);
 
     // Set the "Connect" button's OnClick event
     // to save the address entered from the text box

@@ -42,7 +42,10 @@ if(ENABLE_QT)
 endif()
 
 target_sources(${CMAKE_PROJECT_NAME} 
-  PRIVATE src/Forms/PairDialog.cpp
+  PRIVATE src/Connections/Address.cpp
+          src/Connections/LANSearcher.cpp
+          src/Forms/FindHostsDialog.cpp
+          src/Forms/ManualPairingDialog.cpp
           src/plugin-main.cpp
           src/Properties.cpp
           src/OBSSource.cpp
