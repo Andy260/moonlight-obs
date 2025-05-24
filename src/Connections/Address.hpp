@@ -25,6 +25,16 @@ namespace MoonlightOBS
         Address(std::string_view address, uint16_t port);
 
         /**
+         * @brief Gets an empty Address object.
+         * 
+         * @return Address The created Address object.
+         */
+        inline static Address GetEmpty()
+        {
+            return Address("", 0);
+        }
+
+        /**
          * @brief Get the IP address or hostname of the connection.
          * 
          * @return std::string_view The address of the connection.
@@ -49,7 +59,7 @@ namespace MoonlightOBS
          * 
          * @return uint16_t The port number of the connection.
          */
-        inline uint16_t GetPort() const
+        inline uint16_t GetPortNumber() const
         {
             return m_port;
         }
@@ -61,7 +71,7 @@ namespace MoonlightOBS
          * 
          * @exception std::out_of_range If the port number is not between 0 and 65535.
          */
-        void SetPort(uint16_t port);
+        void SetPortNumber(uint16_t port);
 
         /**
          * @brief Converts the Address object to a string representation.
@@ -70,7 +80,24 @@ namespace MoonlightOBS
          */
         inline std::string GetString() const
         {
+            // Return an empty string if the address is empty
+            if (m_address.empty())
+            {
+                return "";
+            }
+
             return m_address + ":" + std::to_string(m_port);
+        }
+
+        /**
+         * @brief Checks if the Address object is valid.
+         * 
+         * @return true If the address is not empty and the port is valid.
+         * @return false If the address is empty or the port is invalid.
+         */
+        inline bool IsValid() const
+        {
+            return !m_address.empty() && m_port > 0 && m_port <= 65535;
         }
 
         /**
@@ -78,7 +105,7 @@ namespace MoonlightOBS
          */
         inline friend std::ostream& operator<<(std::ostream& os, const Address& address)
         {
-            os << address.m_address << ":" << address.m_port;
+            os << address.GetString();
             return os;
         }
 

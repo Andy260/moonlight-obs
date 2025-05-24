@@ -14,13 +14,14 @@
 
 // Project includes
 #include "../plugin-support.h"
-#include "../Connections/LANSearcher.hpp"
+#include "../Connections/GameStreamHost.hpp"
+#include "../Discovery/LANSearcher.hpp"
 #include "ManualPairingDialog.hpp"
 
 using namespace MoonlightOBS;
 
 FindHostsDialog::FindHostsDialog(QWidget* parent)
-    : QDialog(parent), m_selectedHost(Host::GetEmpty())
+    : QDialog(parent), m_selectedHost(GameStreamHost::GetEmpty())
 {
     setWindowTitle(obs_module_text("FindHostsDialog.Title"));
 
@@ -64,12 +65,12 @@ FindHostsDialog::FindHostsDialog(QWidget* parent)
     connect(m_cancelButton, &QPushButton::clicked, this, &QDialog::reject);
 
     // Start searching for hosts
-    LANSearcher::Start([this](const Host& foundHost)
+    LANSearcher::Start([this](const GameStreamHost& foundHost)
     {
         // Keep track of the found hosts
-        m_foundHosts.emplace(foundHost.GetName(), foundHost);
+        m_foundHosts.emplace(foundHost.GetHostname(), foundHost);
         // Add the found host to the list widget
-        m_hostListWidget->addItem(QString::fromStdString(foundHost.GetName()));
+        m_hostListWidget->addItem(QString::fromStdString(foundHost.GetHostname()));
     });
 }
 
@@ -103,8 +104,8 @@ void FindHostsDialog::OnHostSelectionChanged(QListWidgetItem* current, QListWidg
         {
             // This shouldn't happen
             // Set the selected host to an empty host
-            m_selectedHost = Host::GetEmpty();
-
+            m_selectedHost = GameStreamHost::GetEmpty();
+            
             // Log this event
             obs_log(LOG_WARNING, "Unable to select %s, not in map.", hostName.c_str());
         }

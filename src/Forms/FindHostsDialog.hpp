@@ -7,7 +7,7 @@
 #include <QDialog>
 
 // Project includes
-#include "../Connections/Host.hpp"
+#include "../Connections/GameStreamHost.hpp"
 
 // Forward declarations
 class QListWidget;
@@ -45,7 +45,7 @@ namespace MoonlightOBS
          * 
          * @return Host The selected host.
          */
-        inline Host GetSelectedHost() const
+        inline GameStreamHost GetSelectedHost() const
         {
             return m_selectedHost;
         }
@@ -65,9 +65,9 @@ namespace MoonlightOBS
         QPushButton* m_cancelButton;
 
         // Selected host
-        Host m_selectedHost;
+        GameStreamHost m_selectedHost;
         // Map of found hosts
         // Key: Host name, Value: Host object
-        std::map<std::string, Host> m_foundHosts;
+        std::map<std::string, GameStreamHost> m_foundHosts;
     };
 } // namespace MoonlightOBS

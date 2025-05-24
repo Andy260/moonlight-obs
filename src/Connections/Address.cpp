@@ -9,16 +9,16 @@ Address::Address(std::string_view address, uint16_t port)
     : m_address(address), m_port(port)
 {
     // Ensure the port number is valid
-    if (port > 65535)
+    if (port > 65535 || port < 0)
     {
         throw std::out_of_range("Port number must be between 0 and 65535");
     }
 }
 
-void Address::SetPort(uint16_t port)
+void Address::SetPortNumber(uint16_t port)
 {
     // Ensure the port number is valid
-    if (port > 65535)
+    if (port > 65535 || port < 0)
     {
         throw std::out_of_range("Port number must be between 0 and 65535");
     }

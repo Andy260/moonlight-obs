@@ -17,8 +17,11 @@ add_library(${CMAKE_PROJECT_NAME} MODULE)
 # and link as a static library
 set(BUILD_SHARED_LIBS OFF)
 add_subdirectory(deps/moonlight-common-c)
-include_directories(deps/moonlight-common-c/src) 
+include_directories(deps/moonlight-common-c/src)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE moonlight-common-c)
+
+# Add mdns dependency
+include_directories(deps/mdns)
 
 find_package(libobs REQUIRED)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OBS::libobs)
@@ -43,7 +46,8 @@ endif()
 
 target_sources(${CMAKE_PROJECT_NAME} 
   PRIVATE src/Connections/Address.cpp
-          src/Connections/LANSearcher.cpp
+          src/Discovery/LANSearcher.cpp
+          src/Discovery/mDNSRecordExtractor.cpp
           src/Forms/FindHostsDialog.cpp
           src/Forms/ManualPairingDialog.cpp
           src/plugin-main.cpp
