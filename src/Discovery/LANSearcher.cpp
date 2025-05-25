@@ -170,6 +170,13 @@ void LANSearcher::SearchThread(std::function<void(const GameStreamHost&)> callba
         // Resolve the discovered hosts
         for (auto& [serviceName, host] : discoveredHosts)
         {
+            // Resolved hostname and port from the IPv4 socket
+            std::string ipv4Hostname    = "";
+            uint16_t ipv4Port           = -1;
+            // Resolved hostname and port from the IPv6 socket
+            std::string ipv6Hostname    = "";
+            uint16_t ipv6Port           = -1;
+
             // Attempt to resolve the hostname of the host
             // using the IPv4 socket
             if (ipv4Socket >= 0)
@@ -189,10 +196,10 @@ void LANSearcher::SearchThread(std::function<void(const GameStreamHost&)> callba
                         hostname.erase(hostname.length() - suffix.length());
                     }
 
-                    // Set the hostname of the host
-                    host.SetHostname(hostname);
-                    // Set the port of the host
-                    host.SetIPv4Address(Address("", srvRecord.GetPort()));
+                    // Save the resolved hostname
+                    ipv4Hostname = hostname;
+                    // Save the resolved port
+                    ipv4Port = srvRecord.GetPort();
                 }
                 catch (const std::runtime_error& exception)
                 {
@@ -205,7 +212,7 @@ void LANSearcher::SearchThread(std::function<void(const GameStreamHost&)> callba
             }
             // Attempt to resolve the hostname of the host
             // using the IPv6 socket (if not resolved by the IPv4 socket)
-            if (ipv6Socket >= 0 && !host.GetHostname().empty())
+            if (ipv6Socket >= 0 && ipv4Hostname.empty())
             {
                 try
                 {
@@ -222,10 +229,10 @@ void LANSearcher::SearchThread(std::function<void(const GameStreamHost&)> callba
                         hostname.erase(hostname.length() - suffix.length());
                     }
 
-                    // Set the hostname of the host
-                    host.SetHostname(hostname);
-                    // Set the port of the host
-                    host.SetIPv6Address(Address("", srvRecord.GetPort()));
+                    // Save the resolved hostname
+                    ipv6Hostname = hostname;
+                    // Save the resolved port
+                    ipv6Port = srvRecord.GetPort();
                 }
                 catch (const std::runtime_error& exception)
                 {
@@ -234,6 +241,83 @@ void LANSearcher::SearchThread(std::function<void(const GameStreamHost&)> callba
                     // Query failed, log the error
                     obs_log(LOG_WARNING, "Failed to resolve hostname for service '%s' on IPv6 socket: %i", 
                         serviceName.c_str(), ipv6Socket);
+                }
+            }
+
+            // Calculate the expected hostname based on the service name
+            std::string expectedHostname = serviceName;
+            // Strip the _nvstream._tcp.local. postfix from the service name
+            expectedHostname = expectedHostname.erase(serviceName.find("._nvstream._tcp.local."), 
+                std::string("._nvstream._tcp.local.").length());
+
+            if (ipv4Hostname == ipv6Hostname)
+            {
+                // Both hostnames are the same
+                if (ipv4Hostname == expectedHostname)
+                {
+                    // This is the best case scenario, all hostnames match
+                    host.SetHostname(ipv4Hostname);
+                    // Set the IPv4 address
+                    host.SetIPv4Address(Address("", ipv4Port));
+                    // Set the IPv6 address
+                    host.SetIPv6Address(Address("", ipv6Port));
+                }
+                else
+                {
+                    // Both resolved IPv4 and IPv6 hostnames do not 
+                    // match the expected hostname, log the error
+                    std::stringstream errorStream;
+
+                    // Log format: Resolved hostnames for service '<serviceName>' do not match the expected hostname '<expectedHostname>'.
+                    // This is likely due to a misconfiguration of the GameStream host. (IPv4: <ipv4Hostname>, IPv6: <ipv6Hostname>)
+                    errorStream << "Resolved hostnames for service '";
+                    errorStream << serviceName << "' do not match the expected hostname '";
+                    errorStream << expectedHostname << "'. ";
+                    errorStream << "This is likely due to a misconfiguration of the GameStream host. ";
+                    errorStream << "(IPv4: " << ipv4Hostname << ", IPv6: " << ipv6Hostname << ")";
+                    // Send the error log to OBS
+                    obs_log(LOG_ERROR, "%s", errorStream.str().c_str());
+
+                    // Skip this host
+                    continue;
+                }
+            }
+            else
+            {
+                // Getting to this point means that the hostnames resolved are different
+                // so we must choose one of them to use as the hostname (assuming at least one is valid)
+
+                if (ipv4Hostname == expectedHostname)
+                {
+                    // Use the IPv4 hostname as it matches the expected hostname
+                    host.SetHostname(ipv4Hostname);
+                    // Set the IPv4 port
+                    host.SetIPv4Address(Address("", ipv4Port));
+                }
+                else if (ipv6Hostname == expectedHostname)
+                {
+                    // Use the IPv6 hostname as it matches the expected hostname
+                    host.SetHostname(ipv6Hostname);
+                    // Set the IPv6 port
+                    host.SetIPv6Address(Address("", ipv6Port));
+                }
+                else
+                {
+                    // Neither hostname matches the expected hostname, log the error
+                    std::stringstream errorStream;
+
+                    // Log format: Resolved hostnames for service '<serviceName>' do not match the expected hostname '<expectedHostname>'.
+                    // This is likely due to a misconfiguration of the GameStream host. (IPv4: <ipv4Hostname>, IPv6: <ipv6Hostname>)
+                    errorStream << "Resolved hostnames for service '";
+                    errorStream << serviceName << "' do not match the expected hostname '";
+                    errorStream << expectedHostname << "'. ";
+                    errorStream << "This is likely due to a misconfiguration of the GameStream host. ";
+                    errorStream << "(IPv4: " << ipv4Hostname << ", IPv6: " << ipv6Hostname << ")";
+                    // Send the error log to OBS
+                    obs_log(LOG_ERROR, "%s", errorStream.str().c_str());
+
+                    // Skip this host
+                    continue;
                 }
             }
 
@@ -473,7 +557,7 @@ Address LANSearcher::ResolveIPAddress(const GameStreamHost& host, int socket, bo
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // Extract the mDNS records from the response to the ipv4 query
-    mDNSRecordExtractor records = mDNSRecordExtractor::Extract(socket, queryID, hostname, MDNS_ENTRYTYPE_ANSWER);
+    mDNSRecordExtractor records = mDNSRecordExtractor::Extract(socket, queryID, "", MDNS_ENTRYTYPE_ANSWER);
 
     const std::vector<Address>& receivedRecords = !useIPv6 ? records.GetARecords() : records.GetAAAARecords();
     // Check if any records were found
