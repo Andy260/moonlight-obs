@@ -77,8 +77,11 @@ namespace MoonlightOBS
         
         // Function used discover the instance names of the available GameStream hosts
         static std::vector<std::string> DiscoverInstanceNames(int socket);
-        // Function used to discover the hostname and port of a discovered GameStream host
-        static SRVRecord ResolveHostname(const std::string_view& serviceName, int socket);
+        // Function used to discover the mDNS hostname and port of a discovered GameStream host
+        static SRVRecord ResolvemDNSHostname(const std::string_view& serviceName, int socket);
+        // Function used to resolve the hostname of the GameStream host 
+        // using the /serverinfo endpoint of the host
+        static std::string ResolveHostname(const Address& address);
         // Function used to resolve the IP address of a discovered GameStream host
         static Address ResolveIPAddress(const GameStreamHost& host, int socket, bool useIPv6);
 

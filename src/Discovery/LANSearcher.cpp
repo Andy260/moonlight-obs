@@ -17,10 +17,33 @@
 // mdns includes
 #include <mdns.h>
 
+// Workaround for Windows min/max macros conflicting with std::min/std::max.
+// This should be placed before including headers that use std::min or std::max,
+// or headers that might themselves include Windows headers without NOMINMAX.
+// 
+// This seems to be caused by the mdns header including Windows headers,
+// which define min and max as macros, causing conflicts with the C++ standard library.
+#if defined(_WIN32) || defined(_WIN64)
+  // If min/max are defined as macros, undefine them.
+  #ifdef min
+    #undef min
+  #endif
+  #ifdef max
+    #undef max
+  #endif
+  // Defining NOMINMAX before including windows.h is another common solution,
+  // but undefining is more direct if windows.h has already been included transitively.
+  #ifndef NOMINMAX
+    #define NOMINMAX
+  #endif
+#endif
+
 // Project includes
 #include "../plugin-support.h"
 #include "../Connections/GameStreamHost.hpp"
 #include "mDNSRecordExtractor.hpp"
+#include "../Connections/HTTPClient.hpp"
+#include "../Connections/HostSettings.hpp"
 
 using namespace MoonlightOBS;
 
@@ -184,7 +207,7 @@ void LANSearcher::SearchThread(std::function<void(const GameStreamHost&)> callba
                 try
                 {
                     // Resolve the hostname of the host using the IPv4 socket
-                    SRVRecord srvRecord = ResolveHostname(serviceName, ipv4Socket);
+                    SRVRecord srvRecord = ResolvemDNSHostname(serviceName, ipv4Socket);
                     
                     // Strip the .local. suffix from the hostname
                     std::string hostname = srvRecord.GetTarget();
@@ -217,7 +240,7 @@ void LANSearcher::SearchThread(std::function<void(const GameStreamHost&)> callba
                 try
                 {
                     // Resolve the hostname of the host using the IPv4 socket
-                    SRVRecord srvRecord = ResolveHostname(serviceName, ipv6Socket);
+                    SRVRecord srvRecord = ResolvemDNSHostname(serviceName, ipv6Socket);
 
                     // Strip the .local. suffix from the hostname
                     std::string hostname = srvRecord.GetTarget();
@@ -385,6 +408,38 @@ void LANSearcher::SearchThread(std::function<void(const GameStreamHost&)> callba
                 host.SetIPv6Address(Address::GetEmpty());
             }
             
+            // Attempt to resolve the hostname of the host using the /serverInfo endpoint
+            try
+            {
+                // Resolve the hostname of the host using the 
+                // /serverinfo endpoint of the host
+                std::string hostname = ResolveHostname(host.GetIPv4Address().IsValid() ? 
+                    host.GetIPv4Address() : host.GetIPv6Address());
+
+                if (!hostname.empty())
+                {
+                    // Set the hostname of the host to the resolved hostname
+                    host.SetHostname(hostname);
+                }
+                else
+                {
+                    // If the hostname is empty, log the error
+                    obs_log(LOG_WARNING, "Resolved hostname is empty for host '%s', falling back to mDNS hostname.", 
+                        host.GetHostname().c_str());
+                }
+            }
+            catch (const std::exception& exception)
+            {
+                UNUSED_PARAMETER(exception);
+
+                // Log the error if the hostname could not be resolved
+                obs_log(LOG_WARNING, "Failed to resolve hostname for host: %s (Service Name: %s)", 
+                    host.GetHostname().c_str(), serviceName.c_str());
+                
+                // Skip this host
+                continue;
+            }
+
             // Check if the host was resolved successfully
             if (!host.IsValid())
             {
@@ -396,9 +451,6 @@ void LANSearcher::SearchThread(std::function<void(const GameStreamHost&)> callba
 
             // Add the host to the found hosts map
             foundHosts.try_emplace(serviceName, host);
-
-            // Log the resolved host
-            std::stringstream logStream;
 
             // Log the resolved host with its service name and addresses
             LogHost(LOG_INFO, "Found GameStream host", host, serviceName);
@@ -465,7 +517,7 @@ std::vector<std::string> LANSearcher::DiscoverInstanceNames(int socket)
     return ipv4Records.GetPTRRecords();
 }
 
-SRVRecord LANSearcher::ResolveHostname(const std::string_view& serviceName, int socket)
+SRVRecord LANSearcher::ResolvemDNSHostname(const std::string_view& serviceName, int socket)
 {
     // Ensure the socket is valid
     if (socket < 0)
@@ -510,6 +562,18 @@ SRVRecord LANSearcher::ResolveHostname(const std::string_view& serviceName, int 
 
     // Return the first SRV record
     return srvRecords.front();
+}
+
+std::string LANSearcher::ResolveHostname(const Address& address)
+{
+    // Create the HTTP client
+    HTTPClient httpClient(address);
+
+    // Get the server info from the GameStream host
+    // This may thrown an exception, but it will be caught by the caller
+    HostSettings serverInfo = httpClient.GetServerInfo();
+
+    return serverInfo.GetHostname();
 }
 
 Address LANSearcher::ResolveIPAddress(const GameStreamHost& host, int socket, bool useIPv6)

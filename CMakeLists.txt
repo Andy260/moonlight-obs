@@ -57,10 +57,13 @@ endif()
 
 target_sources(${CMAKE_PROJECT_NAME} 
   PRIVATE src/Connections/Address.cpp
+          src/Connections/HostSettings.cpp
+          src/Connections/HTTPClient.cpp
           src/Discovery/LANSearcher.cpp
           src/Discovery/mDNSRecordExtractor.cpp
           src/Forms/FindHostsDialog.cpp
           src/Forms/ManualPairingDialog.cpp
+          src/Utilities/Version.cpp
           src/plugin-main.cpp
           src/Properties.cpp
           src/OBSSource.cpp
