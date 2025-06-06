@@ -23,6 +23,17 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE moonlight-common-c)
 # Add mdns dependency
 include_directories(deps/mdns)
 
+# Add libcurl dependency
+find_package(CURL REQUIRED)
+include_directories(${CURL_INCLUDE_DIRS})
+target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE ${CURL_LIBRARIES})
+
+# Add TinyXML2 dependency
+include_directories(deps/tinyxml2)
+target_sources(${CMAKE_PROJECT_NAME} 
+    PRIVATE deps/tinyxml2/tinyxml2.cpp
+)
+
 find_package(libobs REQUIRED)
 target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OBS::libobs)
 
